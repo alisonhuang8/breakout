@@ -1,0 +1,33 @@
+Describe at least one variant of Breakout that you thought was interesting and what was interesting about it.
+The Vortex variant of Breakout was the most intriguing because it appears to require physics and trigonometry. The circular motion of
+the paddle, the ball, and the blocks reminded me of problems from calculus. It seems like the best combination of outside knowledge 
+as well as programming. It stimulated thoughts on how to keep the calculations of all the moving components in accordance to angles
+and polar coordinates as the game progresses.
+
+Describe a general description of the different levels you intend to build (perhaps with "pictures" of the block configurations)
+1. checkered blocks with spaces in between, the bottom most row has the type 1 blocks
+2. type 3 blocks in every other row
+3. square of type 1 blocks, in the center is a type 2 block
+
+Give several different blocks you want to create
+1. takes 3 hits to break
+2. if you hit this block the ball will speed up (so people will want to avoid until the end)
+3. moving block (side to side)
+4. a block that changes position every 10 seconds
+
+Give several different power ups you want to create
+1. extra life
+2. slow down the ball
+3. make the paddle longer
+4. skip to the next level
+
+Give several different cheat keys you are planning to include
+1. player presses a numeric key (i.e., 1-9), clear the current level and jump to the level corresponding to the number pressed
+2. L for extra lives
+3. R for reset ball and paddle
+4. where the power ups are hidden in this level
+
+Describe something extra you intend to add and why you think it is a substantial addition
+- adding a timed component to overall score. number of seconds will be halved and then subtracted from points earned from breaking
+the blocks. this is a substantial addition because it gives the player an incentive to be strategic about where he/she is aiming
+the ball, as opposed to just randomly pushing it here and there.
