@@ -15,6 +15,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -56,21 +57,23 @@ public class Game extends Application {
 	static int level = 1;
 	private int[][] L1 = new int[2][2];
 	private int[][] L2 = new int[2][2];
-	private ArrayList<Rectangle> remBlocks = new ArrayList<Rectangle>();
-	
-	
+	private ArrayList<Rectangle> currentBlocks = new ArrayList<Rectangle>();
+	private Scene currentScene;
+
+
 	@Override
 	public void start(Stage stage) {
-		
+
 		fillMatrices();
 
 		Scene scene_homePage = setupHP(SIZE, SIZE, BACKGROUND, stage); //set up scene for home page
-		stage.setScene(scene_homePage);
+		currentScene = scene_homePage;
+		stage.setScene(currentScene);
 		stage.show();
 
 
 	}
-	
+
 	private void fillMatrices(){
 		L1[0][0] = 1;
 		L1[0][1] = 2;
@@ -80,7 +83,7 @@ public class Game extends Application {
 		L2[0][1] = 4;
 		L2[1][0] = 4;
 		L2[1][1] = 3;
-		
+
 	}
 
 	private Scene setupHP (int width, int height, Paint background, Stage stage) {
@@ -97,8 +100,9 @@ public class Game extends Application {
 		btn_Play.setFont(Font.font("Verdana", FontPosture.ITALIC, 15));
 		btn_Play.setOnAction(new EventHandler<ActionEvent>() { //if the button is clicked
 			public void handle(ActionEvent arg){
-				Scene scene = setupLevel(SIZE, SIZE, BACKGROUND, stage); //make a scene for level 1 
-				stage.setScene(scene);
+				Scene scene = setupLevel(SIZE, SIZE, BACKGROUND, stage); //make a scene for level 1
+				currentScene = scene;
+				stage.setScene(currentScene);
 			}
 		});
 
@@ -120,7 +124,7 @@ public class Game extends Application {
 
 		Group root = new Group();
 		int[][] mat = new int[2][2]; //make a matrix
-		
+
 		if (level == 1){ //check what level to make
 			mat = L1;
 		} else if (level == 2){
@@ -129,27 +133,20 @@ public class Game extends Application {
 
 		Level l = new Level(root, mat); //create object
 		l.makeLevel(); //make the level
-		remBlocks = l.blocks;
-		//root should have 
-		
+		currentBlocks = l.blocks;
+
+		//root should currently have all the Blocks as rectangles and only that
+
+
 		Scene scene = new Scene(root, width, height, background);
 		ballAndPaddle(root, width, height, scene);
-		
-		Boolean[] removes = blocksHit(l.blocks);
-		
-		for (int i=0; i<l.blocks.size(); i++){
-			if (removes[i]){
-				l.blocks.remove(i);
-			}
-		}
-		
-		if (l.blocks.size() == 0){
-			level++;
-			scene = setupLevel(width, height, background, stage);
-			stage.setScene(scene);
-		}
 
-		
+
+
+
+
+
+
 
 
 		return scene;
@@ -169,41 +166,65 @@ public class Game extends Application {
 	private void step (double elapsedTime, Stage stage) {
 		// update attributes
 		ballBounce(elapsedTime, stage);
-		
+		removeBlocksHit();
+		newLevel(SIZE, SIZE, BACKGROUND, stage);
 
 	}
 
-	private Boolean[] blocksHit(ArrayList<Rectangle> array){
-		Boolean[] ret = new Boolean[array.size()];
-		
-		for (int i=0; i<array.size(); i++){
-			ret[i] = blockWasHit(array.get(i));
+	private void removeBlocksHit(){
+		Group root = (Group) currentScene.getRoot();
+		for (int i=0; i<currentBlocks.size(); i++){
+			if (blockWasHit(currentBlocks.get(i))){
+				root.getChildren().remove(currentBlocks.get(i));
+				currentBlocks.remove(i);
+			}
 		}
-		
-		return ret;
 	}
-	
+
+	private void newLevel(int width, int height, Paint background, Stage stage){
+		if (currentBlocks.size() == 0){
+			level++;
+			if (level == 4){
+				VBox root = new VBox();
+				root.setAlignment(Pos.CENTER);
+				Label lb = new Label("YOU WIN!");
+				root.getChildren().add(lb);
+				currentScene.setRoot(root);
+				stage.setScene(currentScene);
+			} else {
+				currentScene = setupLevel(width, height, background, stage);
+				stage.setScene(currentScene);
+			}
+		}
+	}
+
 	private Boolean blockWasHit(Rectangle rec){
-		Boolean ballBelow = (myBall.getBoundsInParent().getMinY() < rec.getBoundsInParent().getMaxY()) && 
-				(myBall.getBoundsInParent().getMaxY() > rec.getBoundsInParent().getMaxY());
-		Boolean ballAbove = (myBall.getBoundsInParent().getMaxY() > rec.getBoundsInParent().getMinY()) && 
-				(myBall.getBoundsInParent().getMinY() < rec.getBoundsInParent().getMinY());
-		Boolean ballLeft = (myBall.getBoundsInParent().getMaxX() > rec.getBoundsInParent().getMinX()) && 
-				(myBall.getBoundsInParent().getMinX() < rec.getBoundsInParent().getMinX());
-		Boolean ballRight = (myBall.getBoundsInParent().getMinX() < rec.getBoundsInParent().getMaxX()) && 
-				(myBall.getBoundsInParent().getMaxX() > rec.getBoundsInParent().getMaxX());
+//		Boolean ballBelow = (myBall.getBoundsInParent().getMinY() < rec.getBoundsInParent().getMaxY()) && 
+//				(myBall.getBoundsInParent().getMaxY() > rec.getBoundsInParent().getMaxY());
+//		Boolean ballAbove = (myBall.getBoundsInParent().getMaxY() > rec.getBoundsInParent().getMinY()) && 
+//				(myBall.getBoundsInParent().getMinY() < rec.getBoundsInParent().getMinY());
+//		Boolean ballLeft = (myBall.getBoundsInParent().getMaxX() > rec.getBoundsInParent().getMinX()) && 
+//				(myBall.getBoundsInParent().getMinX() < rec.getBoundsInParent().getMinX());
+//		Boolean ballRight = (myBall.getBoundsInParent().getMinX() < rec.getBoundsInParent().getMaxX()) && 
+//				(myBall.getBoundsInParent().getMaxX() > rec.getBoundsInParent().getMaxX());
+//
+//
+//		if (ballBelow) {
+//			return true;
+//		} else if (ballAbove) {
+//			return true;
+//		} else if (ballLeft) {
+//			return true;
+//		} else if (ballRight){
+//			return true;
+//		}
 		
-		
-		if (ballBelow) {
-			return true;
-		} else if (ballAbove) {
-			return true;
-		} else if (ballLeft) {
-			return true;
-		} else if (ballRight){
+		if (myBall.getBoundsInParent().intersects(rec.getBoundsInParent())){
+			deltaX = deltaX * -1;
+			deltaY = deltaY * -1;
 			return true;
 		}
-		
+
 		return false;
 	}
 
@@ -248,10 +269,11 @@ public class Game extends Application {
 
 			if (myBall.getBoundsInParent().getMinY() > SIZE){
 				Group rt = new Group();
-				Scene scene_END = new Scene(rt, SIZE, SIZE);
+				Scene scene_LOSE = new Scene(rt, SIZE, SIZE);
 				Label t = new Label("Game Over");
 				rt.getChildren().add(t);
-				s.setScene(scene_END);
+				currentScene = scene_LOSE;
+				s.setScene(currentScene);
 			}
 		}
 	}
