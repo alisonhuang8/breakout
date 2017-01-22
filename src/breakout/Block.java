@@ -1,22 +1,27 @@
 package breakout;
-
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 public class Block extends Rectangle {
 	private Rectangle block;
-	private int type, xloc, yloc;
+	private int type;
+	private double xloc, yloc;
 	private Boolean hit = false;
-
-	public Block(int t, int x, int y){
+	private Boolean hasPU = false;
+	
+	public Block(int t, double x, double y){
 		type = t;
 		xloc = x;
 		yloc = y;
 	}
-
+	
+	public Block(double x, double y){
+		xloc = x;
+		yloc = y;
+	}
+	
 	public Rectangle createBlock(){
-
 		if (type == 1){
 			block = createType1();
 		} else if (type == 2){
@@ -26,16 +31,14 @@ public class Block extends Rectangle {
 		} else if (type == 4){
 			block = createType4();
 		}
-
 		return block;
 	}
-
 	public Rectangle createType1(){
 		Rectangle rec = new Rectangle();
 		rec.setX(xloc);
 		rec.setY(yloc);
-		rec.setWidth(50);
-		rec.setHeight(10);
+		rec.setWidth(500/9);
+		rec.setHeight(30);
 		rec.setFill(Color.PURPLE);
 		return rec;
 	}
@@ -43,9 +46,9 @@ public class Block extends Rectangle {
 		Rectangle rec = new Rectangle();
 		rec.setX(xloc);
 		rec.setY(yloc);
-		rec.setWidth(50);
-		rec.setHeight(10);
-		rec.setFill(Color.CYAN);
+		rec.setWidth(500/9);
+		rec.setHeight(30);
+		rec.setFill(Color.BLUE);
 		
 		return rec;
 	}
@@ -53,8 +56,8 @@ public class Block extends Rectangle {
 		Rectangle rec = new Rectangle();
 		rec.setX(xloc);
 		rec.setY(yloc);
-		rec.setWidth(50);
-		rec.setHeight(10);
+		rec.setWidth(500/9);
+		rec.setHeight(30);
 		rec.setFill(Color.PINK);
 		return rec;
 	}
@@ -62,35 +65,29 @@ public class Block extends Rectangle {
 		Rectangle rec = new Rectangle();
 		rec.setX(xloc);
 		rec.setY(yloc);
-		rec.setWidth(50);
-		rec.setHeight(10);
-		rec.setFill(Color.CORAL);
+		rec.setWidth(500/9);
+		rec.setHeight(30);
+		rec.setFill(Color.GREEN);
 		return rec;
 	}
 	
-	public Boolean beenHit(ImageView myBall){
-		Boolean ballBelow = (myBall.getBoundsInParent().getMinY() < block.getBoundsInParent().getMaxY()) && 
-				(myBall.getBoundsInParent().getMaxY() > block.getBoundsInParent().getMaxY());
-		Boolean ballAbove = (myBall.getBoundsInParent().getMaxY() > block.getBoundsInParent().getMinY()) && 
-				(myBall.getBoundsInParent().getMinY() < block.getBoundsInParent().getMinY());
-		Boolean ballLeft = (myBall.getBoundsInParent().getMaxX() > block.getBoundsInParent().getMinX()) && 
-				(myBall.getBoundsInParent().getMinX() < block.getBoundsInParent().getMinX());
-		Boolean ballRight = (myBall.getBoundsInParent().getMinX() < block.getBoundsInParent().getMaxX()) && 
-				(myBall.getBoundsInParent().getMaxX() > block.getBoundsInParent().getMaxX());
-		
-		
-		if (ballBelow) {
-			hit = true;
-		} else if (ballAbove) {
-			hit = true;
-		} else if (ballLeft) {
-			hit = true;
-		} else if (ballRight){
-			hit = true;
-		}
-		
-		return hit;
-
+	
+	
+	public int returnType(){
+		return type;
 	}
-
+	
+	public double returnX(){
+		return xloc;
+	}
+	
+	public double returnY(){
+		return yloc;
+	}
+	
+	public void decType(){
+		type = type - 1;
+	}
+	
+	
 }

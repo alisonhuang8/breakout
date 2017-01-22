@@ -2,12 +2,9 @@
 // dont let paddle go off screen
 // make main screen
 // connect levels
-
 package breakout;
-
 import java.util.ArrayList;
 import java.util.Scanner;
-
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
@@ -33,65 +30,71 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
 public class Game extends Application {
 	private Scene myScene;
 	private ImageView myBall;
 	private Rectangle myPaddle;
-
+	private Stage theStage;
 	public static final int SIZE = 500;
 	public static final Paint BACKGROUND = Color.WHITE;
-	public static final int FRAMES_PER_SECOND = 240;
-	public static final int MILLISECOND_DELAY = 1000 / FRAMES_PER_SECOND;
+
+
 	public static final String TITLE = "Breakout";
 	public static final String BALL_IMAGE = "ball.gif";
-	public static final double SECOND_DELAY = 1.0 / FRAMES_PER_SECOND;
 	public static final int KEY_INPUT_SPEED = 10;
 	public static final double GROWTH_RATE = 1.1;
-	public static final int BOUNCER_SPEED = 60;
 
 	private Timeline animation = new Timeline();
+	private int deltaX = 1;
+	private int deltaY = 1;
+	private int deltaRX = 1;
+	private int level = 1;
 
-	static int deltaX = 1;
-	static int deltaY = 1;
-	static int level = 1;
-	private int[][] L1 = new int[2][2];
+	private double BOUNCER_SPEED = 60;
+	private int FRAMES_PER_SECOND = 240;
+	private int MILLISECOND_DELAY = 1000 / FRAMES_PER_SECOND;
+	private double SECOND_DELAY = .75 / FRAMES_PER_SECOND;
+
+	private int[][] L1 = new int[3][5];
 	private int[][] L2 = new int[2][2];
 	private ArrayList<Rectangle> currentBlocks = new ArrayList<Rectangle>();
+	private ArrayList<Rectangle> changedBlocks = new ArrayList<Rectangle>();
+	private ArrayList<Rectangle> currentPU = new ArrayList<Rectangle>();
 	private Scene currentScene;
-
-
+	private Boolean aLevel = false;
+	private int lives = 3;
+	
+	private Label info_level;
+	private Label info_lives;
+	
 	@Override
 	public void start(Stage stage) {
-
 		fillMatrices();
-
-		Scene scene_homePage = setupHP(SIZE, SIZE, BACKGROUND, stage); //set up scene for home page
+		theStage = stage;
+		Scene scene_homePage = setupHP(SIZE, SIZE, BACKGROUND); //set up scene for home page
 		currentScene = scene_homePage;
-		stage.setScene(currentScene);
-		stage.show();
-
-
+		theStage.setScene(currentScene);
+		theStage.show();
 	}
-
+	
 	private void fillMatrices(){
-		L1[0][0] = 1;
-		L1[0][1] = 2;
-		L1[1][0] = 2;
-		L1[1][1] = 1;
-		L2[0][0] = 3;
+		L1[0][0] = 1; L1[0][1] = 2; L1[0][2] = 1; L1[0][3] = 2; L1[0][4] = 1;
+		L1[1][0] = 2; L1[1][1] = 1; L1[1][2] = 2; L1[1][3] = 1; L1[1][4] = 2;
+		L1[2][0] = 4; L1[2][1] = 4; L1[2][2] = 4; L1[2][3] = 4; L1[2][4] = 4;
+
+		L2[0][0] = 1;
 		L2[0][1] = 4;
 		L2[1][0] = 4;
-		L2[1][1] = 3;
-
+		L2[1][1] = 1;
 	}
 
-	private Scene setupHP (int width, int height, Paint background, Stage stage) {
-
-
+	private Scene setupHP (int width, int height, Paint background) {
 		VBox root = new VBox(); //create root for home page scene
 		root.setAlignment(Pos.CENTER); //center the things in the root
 		Scene scene_HP = new Scene (root, width, height, background); //establish the root that will be returned
+		currentScene = scene_HP;
+
+
 
 		Label lb = new Label("BREAKOUT!");
 		lb.setFont(Font.font("Comic Sans", FontWeight.BOLD, 70));
@@ -100,20 +103,36 @@ public class Game extends Application {
 		btn_Play.setFont(Font.font("Verdana", FontPosture.ITALIC, 15));
 		btn_Play.setOnAction(new EventHandler<ActionEvent>() { //if the button is clicked
 			public void handle(ActionEvent arg){
-				Scene scene = setupLevel(SIZE, SIZE, BACKGROUND, stage); //make a scene for level 1
-				currentScene = scene;
-				stage.setScene(currentScene);
+				currentScene = setupLevel(SIZE, SIZE, BACKGROUND);
+				theStage.setScene(currentScene);
 			}
 		});
+		Button btn_instr = new Button("Help");
+		btn_instr.setOnAction(new EventHandler<ActionEvent>() { //if the button is clicked
+			public void handle(ActionEvent arg){
+				Splash s = new Splash();
 
-		root.getChildren().add(btn_Play);
+				currentScene = s.createInstr(width, height, background);
 
+				s.btn_exit.setOnAction(new EventHandler<ActionEvent>() { //if the button is clicked
+					public void handle(ActionEvent arg){
+						currentScene = setupHP(SIZE, SIZE, BACKGROUND);
+						theStage.setScene(currentScene);
+					}
+				});
+
+				theStage.setScene(currentScene);
+			}
+		});
+		root.getChildren().addAll(btn_Play, btn_instr);
 		return scene_HP;
 	}
+	private Scene setupLevel (int width, int height, Paint background) {
 
-	private Scene setupLevel (int width, int height, Paint background, Stage stage) {
+
+		aLevel = true;
 		KeyFrame frame = new KeyFrame(Duration.millis(MILLISECOND_DELAY),
-				e -> step(SECOND_DELAY, stage));
+				e -> step(SECOND_DELAY, theStage));
 		if (animation != null){
 			animation.stop();
 		}
@@ -121,37 +140,26 @@ public class Game extends Application {
 		animation.getKeyFrames().add(frame);
 		animation.play();
 
-
 		Group root = new Group();
 		int[][] mat = new int[2][2]; //make a matrix
-
 		if (level == 1){ //check what level to make
 			mat = L1;
 		} else if (level == 2){
 			mat = L2;
 		}
-
-		Level l = new Level(root, mat); //create object
-		l.makeLevel(); //make the level
+		Level l = new Level(root, mat); //create object with matrix
+		l.makeLevel(level); //make the level
 		currentBlocks = l.blocks;
-
 		//root should currently have all the Blocks as rectangles and only that
-
-
+		info_level = new Label("Level: " + level);
+		info_lives = new Label("Lives remaining: " + lives);
+		info_lives.setLayoutX(60);
+		root.getChildren().addAll(info_level, info_lives);		
 		Scene scene = new Scene(root, width, height, background);
 		ballAndPaddle(root, width, height, scene);
 
-
-
-
-
-
-
-
-
 		return scene;
 	}
-
 	private void ballAndPaddle(Group root, int width, int height, Scene s){
 		Image image = new Image(getClass().getClassLoader().getResourceAsStream(BALL_IMAGE));
 		myBall = new ImageView(image);
@@ -163,25 +171,82 @@ public class Game extends Application {
 		s.setOnKeyPressed(e -> handleKeyInput(e.getCode()));
 	}
 
+
 	private void step (double elapsedTime, Stage stage) {
 		// update attributes
-		ballBounce(elapsedTime, stage);
-		removeBlocksHit();
-		newLevel(SIZE, SIZE, BACKGROUND, stage);
+		newLevel(SIZE, SIZE, BACKGROUND);
 
+		if (aLevel){
+			ballBounce(elapsedTime);
+			removeBlocksHit(elapsedTime);
+			movingBlocks(elapsedTime);
+			updateInfo();
+		}
 	}
 
-	private void removeBlocksHit(){
+	private void updateInfo(){
 		Group root = (Group) currentScene.getRoot();
+		root.getChildren().remove(info_level);
+		root.getChildren().remove(info_lives);
+		info_level = new Label("Level: " + level);
+		info_lives = new Label("Lives remaining: " + lives);
+		info_lives.setLayoutX(60);
+		root.getChildren().addAll(info_level, info_lives);	
+		theStage.setScene(currentScene);
+	}
+
+	private void removeBlocksHit(double elapsedTime){
+		Group root = (Group) currentScene.getRoot();
+
 		for (int i=0; i<currentBlocks.size(); i++){
 			if (blockWasHit(currentBlocks.get(i))){
+				if (currentBlocks.get(i).getFill() == Color.BLUE){
+					BOUNCER_SPEED = BOUNCER_SPEED * 1.25;
+				}
+				if (currentBlocks.get(i).getFill() == Color.GREEN && level == 1){
+					Rectangle newLife = new Rectangle();
+					newLife.setFill(Color.BLACK);
+					newLife.setWidth(20);
+					newLife.setHeight(20);
+					newLife.setX(currentBlocks.get(i).getX()+15);
+					newLife.setY(currentBlocks.get(i).getY());
+					currentPU.add(newLife);
+					root.getChildren().add(newLife);
+				}
 				root.getChildren().remove(currentBlocks.get(i));
 				currentBlocks.remove(i);
 			}
 		}
+
+		for (int i=0; i<currentPU.size(); i++){
+			if (catchPU(currentPU.get(i))){
+				if (level == 1){
+					lives++;
+				} else if (level == 2){
+					myPaddle.setWidth(myPaddle.getWidth() + 20);
+				} else if (level == 3){
+					BOUNCER_SPEED = 0.75 * BOUNCER_SPEED;
+				}
+				root.getChildren().remove(currentPU.get(i));
+				currentPU.remove(i);
+			}
+		}
+		
+		
+
 	}
 
-	private void newLevel(int width, int height, Paint background, Stage stage){
+
+	private Rectangle makeReplacement(Group root, int type, Rectangle old){
+		double xloc = old.getX();
+		double yloc = old.getY();
+
+		Rectangle r = new Block(type, xloc, yloc).createBlock();
+		return r;
+
+	}
+
+	private void newLevel(int width, int height, Paint background){
 		if (currentBlocks.size() == 0){
 			level++;
 			if (level == 4){
@@ -190,45 +255,30 @@ public class Game extends Application {
 				Label lb = new Label("YOU WIN!");
 				root.getChildren().add(lb);
 				currentScene.setRoot(root);
-				stage.setScene(currentScene);
+				theStage.setScene(currentScene);
+				aLevel = false;
+				animation.stop();
 			} else {
-				currentScene = setupLevel(width, height, background, stage);
-				stage.setScene(currentScene);
+				currentScene = setupLevel(width, height, background);
+				theStage.setScene(currentScene);
 			}
 		}
 	}
-
 	private Boolean blockWasHit(Rectangle rec){
-//		Boolean ballBelow = (myBall.getBoundsInParent().getMinY() < rec.getBoundsInParent().getMaxY()) && 
-//				(myBall.getBoundsInParent().getMaxY() > rec.getBoundsInParent().getMaxY());
-//		Boolean ballAbove = (myBall.getBoundsInParent().getMaxY() > rec.getBoundsInParent().getMinY()) && 
-//				(myBall.getBoundsInParent().getMinY() < rec.getBoundsInParent().getMinY());
-//		Boolean ballLeft = (myBall.getBoundsInParent().getMaxX() > rec.getBoundsInParent().getMinX()) && 
-//				(myBall.getBoundsInParent().getMinX() < rec.getBoundsInParent().getMinX());
-//		Boolean ballRight = (myBall.getBoundsInParent().getMinX() < rec.getBoundsInParent().getMaxX()) && 
-//				(myBall.getBoundsInParent().getMaxX() > rec.getBoundsInParent().getMaxX());
-//
-//
-//		if (ballBelow) {
-//			return true;
-//		} else if (ballAbove) {
-//			return true;
-//		} else if (ballLeft) {
-//			return true;
-//		} else if (ballRight){
-//			return true;
-//		}
-		
+
 		if (myBall.getBoundsInParent().intersects(rec.getBoundsInParent())){
-			deltaX = deltaX * -1;
-			deltaY = deltaY * -1;
+			if (rec.getX() < myBall.getX() || myBall.getX() < rec.getX()){ //ball on right or left, change X
+				deltaX = deltaX * -1;
+			} else {
+				deltaY = deltaY * -1;
+			}
+
 			return true;
 		}
-
 		return false;
 	}
 
-	private void ballBounce(double elapsedTime, Stage s){
+	private void ballBounce(double elapsedTime){
 		if (myPaddle != null && myBall != null){
 			Boolean A = myPaddle.getBoundsInParent().getMinY() < myBall.getBoundsInParent().getMinY();
 			Boolean B = myBall.getBoundsInParent().getMaxY() < myPaddle.getBoundsInParent().getMaxY();
@@ -236,20 +286,16 @@ public class Game extends Application {
 			Boolean D = myBall.getBoundsInParent().getMinX() < myPaddle.getBoundsInParent().getMaxX();
 			Boolean E = myBall.getTranslateX() < myPaddle.getX();
 			Boolean F = myBall.getTranslateX() > myPaddle.getX();
-
 			if ( (C && E) || (D && F) ) {
 				if (A && B) {
 					deltaX = deltaX * -1;
 				}
 			} 
-
-
 			if (myBall.getBoundsInParent().getMinX() < 0 || 
 					myBall.getBoundsInParent().getMaxX() > SIZE){
 				deltaX = deltaX * -1;
 			} 
 			myBall.setTranslateX(myBall.getTranslateX() + deltaX * BOUNCER_SPEED * elapsedTime);
-
 
 			Boolean Aa = myPaddle.getBoundsInParent().getMinX() < myBall.getBoundsInParent().getMinX();
 			Boolean Bb = myBall.getBoundsInParent().getMaxX() < myPaddle.getBoundsInParent().getMaxX();
@@ -266,20 +312,70 @@ public class Game extends Application {
 				deltaY = deltaY * -1;
 			} 
 			myBall.setTranslateY(myBall.getTranslateY() + deltaY * BOUNCER_SPEED * elapsedTime);
-
 			if (myBall.getBoundsInParent().getMinY() > SIZE){
-				Group rt = new Group();
-				Scene scene_LOSE = new Scene(rt, SIZE, SIZE);
-				Label t = new Label("Game Over");
-				rt.getChildren().add(t);
-				currentScene = scene_LOSE;
-				s.setScene(currentScene);
+				lives--;
+				if (lives == 0){
+					aLevel = false;
+					VBox rt = new VBox();
+					rt.setAlignment(Pos.CENTER);
+					Scene scene_LOSE = new Scene(rt, SIZE, SIZE);
+					Label lb = new Label("GAME OVER :(");
+					lb.setFont(Font.font("Comic Sans", FontWeight.BOLD, 50));
+					Button btn_SO = new Button("Start Over");
+					btn_SO.setFont(Font.font("Verdana", FontPosture.ITALIC, 15));
+					btn_SO.setOnAction(new EventHandler<ActionEvent>() { //if the button is clicked
+						public void handle(ActionEvent arg){
+							animation.playFromStart();
+							currentScene = setupHP(SIZE, SIZE, BACKGROUND);
+							theStage.setScene(currentScene);
+
+						}
+					});
+					rt.getChildren().addAll(lb, btn_SO);
+					currentScene = scene_LOSE;
+					theStage.setScene(currentScene);
+					animation.stop();
+				} else {
+					SECOND_DELAY = 0.75 * SECOND_DELAY;
+					currentScene = setupLevel(SIZE, SIZE, BACKGROUND);
+					theStage.setScene(currentScene);
+				}
 			}
 		}
 	}
 
-	private void handleKeyInput (KeyCode code) {
+	private void movingBlocks(double elapsedTime){
+		for (int i=0; i<currentBlocks.size(); i++){
+			Rectangle r = currentBlocks.get(i);
+			if (r.getFill() == Color.PINK){
+				if (r.getBoundsInParent().getMaxX() > SIZE || r.getBoundsInParent().getMinX() < 0){
+					deltaRX = deltaRX * -1;
+				}
+				r.setTranslateX(r.getTranslateX() + deltaRX * BOUNCER_SPEED * elapsedTime);
+			}
+		}
+		for (int i=0; i<currentPU.size(); i++){
+			Rectangle r = currentPU.get(i);
+			if (r.getFill() == Color.BLACK){
+				r.setTranslateY(r.getTranslateY() +  BOUNCER_SPEED * elapsedTime);
+			}
+			if (r.getY() > SIZE){
+				currentPU.remove(i);
+			}
+		}
 
+	}
+
+	private Boolean catchPU(Rectangle r){
+		if (myPaddle.getBoundsInParent().intersects(r.getBoundsInParent())){
+			return true;
+		}
+
+		return false;
+
+	}
+
+	private void handleKeyInput (KeyCode code) {
 		if (code == KeyCode.RIGHT & myPaddle.getBoundsInParent().getMaxX() < SIZE ) {
 			myPaddle.setX(myPaddle.getX() + KEY_INPUT_SPEED);
 		}
@@ -292,12 +388,37 @@ public class Game extends Application {
 		else if (code == KeyCode.DOWN & myPaddle.getBoundsInParent().getMaxY() < SIZE) {
 			myPaddle.setY(myPaddle.getY() + KEY_INPUT_SPEED);
 		}
+		else if (code == KeyCode.DIGIT1){
+			level = 1;
+			currentScene = setupLevel(SIZE, SIZE, BACKGROUND);
+			
+		}
+		else if (code == KeyCode.DIGIT2){
+			level = 2;
+			currentScene = setupLevel(SIZE, SIZE, BACKGROUND);
+			
+		}
+		else if (code == KeyCode.X){
+			level = 1;
+			lives = 3;
+			currentScene = setupHP(SIZE, SIZE, BACKGROUND);
+			aLevel = false;
+			theStage.setScene(currentScene);
+		}
+		else if (code == KeyCode.L){
+			lives++;
+		}
+		else if (code == KeyCode.R){
+			currentScene = setupLevel(SIZE, SIZE, BACKGROUND);
+		}
+		else if (code == KeyCode.S){
+			BOUNCER_SPEED = 0.75 * BOUNCER_SPEED;
+		}
+		else if (code == KeyCode.F){
+			BOUNCER_SPEED = 1.25 * BOUNCER_SPEED;
+		}
 	}
-
-
 	public static void main(String[] args){
 		launch(args);
 	}
-
-
 }
