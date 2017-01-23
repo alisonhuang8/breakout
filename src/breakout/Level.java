@@ -16,35 +16,55 @@ public class Level {
 	public double y = 20;
 	public ArrayList<Rectangle> blocks = new ArrayList<Rectangle>();
 	public ArrayList<Rectangle> type3 = new ArrayList<Rectangle>();
-	
+
 	public Level(Group r, int[][] m){
 		root = r;
 		matrix = m;
 	}
-	
+
 	public Level(Group r, Scanner s){
 		root = r;
 		scanner = s;
 	}
-	
+
 	public void makeLevel(int level){
 		for (int i=0; i<matrix.length; i++){
-			x = 0;
+			if (level == 3){
+				x = 1000/9;
+			} else {
+				x = 0;
+			}
 			for (int j=0; j<matrix[i].length; j++) {
 				blocks.add(new Block(matrix[i][j], x + 1000/9*j, y).createBlock());
 
 			}
-			y = y + 50;
+			if (level == 2){
+				y = y + 80;
+			} else{
+				y = y + 40;
+			}
 		}
 		if (level == 1){
 			Rectangle r = new Block(3, 0, 170).createBlock();
+			blocks.add(r);
+		}
+		if (level == 2){
+			Rectangle r1 = new Block(3, 0, 60).createBlock();
+			Rectangle r2 = new Block(3, 0, 140).createBlock();
+			Rectangle r3 = new Block(3, 0, 220).createBlock();
+			blocks.add(r1);
+			blocks.add(r2);
+			blocks.add(r3);
+		}
+		if (level == 3){
+			Rectangle r = new Block(5).createBlock();
 			blocks.add(r);
 		}
 		for (int i=0; i<blocks.size(); i++){
 			root.getChildren().add(blocks.get(i));
 		}
 	}
-	
+
 	public void readLevel(){
 		int j = 0;
 		while (scanner.hasNext()){

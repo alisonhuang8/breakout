@@ -16,6 +16,10 @@ public class Block extends Rectangle {
 		yloc = y;
 	}
 	
+	public Block(int t){
+		type = t;
+	}
+	
 	public Block(double x, double y){
 		xloc = x;
 		yloc = y;
@@ -30,6 +34,8 @@ public class Block extends Rectangle {
 			block = createType3();
 		} else if (type == 4){
 			block = createType4();
+		} else if (type == 5){
+			block = createType5();
 		}
 		return block;
 	}
@@ -52,7 +58,7 @@ public class Block extends Rectangle {
 		
 		return rec;
 	}
-	public Rectangle createType3(){
+	public Rectangle createType3(){ // moving block
 		Rectangle rec = new Rectangle();
 		rec.setX(xloc);
 		rec.setY(yloc);
@@ -61,7 +67,7 @@ public class Block extends Rectangle {
 		rec.setFill(Color.PINK);
 		return rec;
 	}
-	public Rectangle createType4(){
+	public Rectangle createType4(){ // power ups
 		Rectangle rec = new Rectangle();
 		rec.setX(xloc);
 		rec.setY(yloc);
@@ -70,6 +76,16 @@ public class Block extends Rectangle {
 		rec.setFill(Color.GREEN);
 		return rec;
 	}
+	public Rectangle createType5(){ // power ups
+		Rectangle rec = new Rectangle();
+		rec.setX(xloc);
+		rec.setY(yloc);
+		rec.setWidth(500/9);
+		rec.setHeight(30);
+		rec.setFill(Color.ORANGE);
+		return rec;
+	}
+	
 	
 	
 	

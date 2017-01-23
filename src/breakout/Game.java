@@ -4,7 +4,8 @@
 // connect levels
 package breakout;
 import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.Random;
+import java.text.DecimalFormat;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
@@ -12,7 +13,6 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -23,15 +23,12 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 public class Game extends Application {
-	private Scene myScene;
 	private ImageView myBall;
 	private Rectangle myPaddle;
 	private Stage theStage;
@@ -56,17 +53,22 @@ public class Game extends Application {
 	private double SECOND_DELAY = .75 / FRAMES_PER_SECOND;
 
 	private int[][] L1 = new int[3][5];
-	private int[][] L2 = new int[2][2];
+	private int[][] L2 = new int[3][5];
+	private int[][] L3 = new int[3][3];
 	private ArrayList<Rectangle> currentBlocks = new ArrayList<Rectangle>();
-	private ArrayList<Rectangle> changedBlocks = new ArrayList<Rectangle>();
 	private ArrayList<Rectangle> currentPU = new ArrayList<Rectangle>();
 	private Scene currentScene;
 	private Boolean aLevel = false;
 	private int lives = 3;
-	
+	private double score = 0;
+	private double time = 0;
+	private double lastTime = 0;
+
 	private Label info_level;
 	private Label info_lives;
-	
+	private Label info_score;
+	private Label info_time;
+
 	@Override
 	public void start(Stage stage) {
 		fillMatrices();
@@ -76,16 +78,19 @@ public class Game extends Application {
 		theStage.setScene(currentScene);
 		theStage.show();
 	}
-	
+
 	private void fillMatrices(){
 		L1[0][0] = 1; L1[0][1] = 2; L1[0][2] = 1; L1[0][3] = 2; L1[0][4] = 1;
 		L1[1][0] = 2; L1[1][1] = 1; L1[1][2] = 2; L1[1][3] = 1; L1[1][4] = 2;
 		L1[2][0] = 4; L1[2][1] = 4; L1[2][2] = 4; L1[2][3] = 4; L1[2][4] = 4;
 
-		L2[0][0] = 1;
-		L2[0][1] = 4;
-		L2[1][0] = 4;
-		L2[1][1] = 1;
+		L2[0][0] = 1; L2[0][1] = 1; L2[0][2] = 1; L2[0][3] = 1; L2[0][4] = 1;
+		L2[1][0] = 1; L2[1][1] = 1; L2[1][2] = 1; L2[1][3] = 1; L2[1][4] = 1;
+		L2[2][0] = 1; L2[2][1] = 1; L2[2][2] = 1; L2[2][3] = 1; L2[2][4] = 1;
+
+		L3[0][0] = 1; L3[0][1] = 1; L3[0][2] = 1;
+		L3[1][0] = 1; L3[1][1] = 2; L3[1][2] = 1;
+		L3[2][0] = 1; L3[2][1] = 1; L3[2][2] = 1;
 	}
 
 	private Scene setupHP (int width, int height, Paint background) {
@@ -146,6 +151,8 @@ public class Game extends Application {
 			mat = L1;
 		} else if (level == 2){
 			mat = L2;
+		} else if (level == 3){
+			mat = L3;
 		}
 		Level l = new Level(root, mat); //create object with matrix
 		l.makeLevel(level); //make the level
@@ -163,9 +170,9 @@ public class Game extends Application {
 	private void ballAndPaddle(Group root, int width, int height, Scene s){
 		Image image = new Image(getClass().getClassLoader().getResourceAsStream(BALL_IMAGE));
 		myBall = new ImageView(image);
-		myBall.setTranslateX(width / 2 - myBall.getBoundsInLocal().getWidth() / 2);
-		myBall.setTranslateY(height / 2 - myBall.getBoundsInLocal().getHeight() / 2);
-		myPaddle = new Rectangle(215,400,70,10);
+		myBall.setTranslateX(250);
+		myBall.setTranslateY(250);
+		myPaddle = new Rectangle(215,450,70,10);
 		myPaddle.setFill(Color.BLUE);
 		root.getChildren().addAll(myBall, myPaddle);
 		s.setOnKeyPressed(e -> handleKeyInput(e.getCode()));
@@ -181,17 +188,30 @@ public class Game extends Application {
 			removeBlocksHit(elapsedTime);
 			movingBlocks(elapsedTime);
 			updateInfo();
+			updateTime(elapsedTime);
+
 		}
+	}
+
+	private void updateTime(double elapsedTime){
+		time = time + elapsedTime;
+
 	}
 
 	private void updateInfo(){
 		Group root = (Group) currentScene.getRoot();
 		root.getChildren().remove(info_level);
 		root.getChildren().remove(info_lives);
+		root.getChildren().remove(info_score);
+		root.getChildren().remove(info_time);
 		info_level = new Label("Level: " + level);
 		info_lives = new Label("Lives remaining: " + lives);
+		info_score = new Label("Score: " + score);
+		info_time = new Label("Seconds elapsed: " + new DecimalFormat("#.#").format(time));
 		info_lives.setLayoutX(60);
-		root.getChildren().addAll(info_level, info_lives);	
+		info_score.setLayoutX(180);
+		info_time.setLayoutX(250);
+		root.getChildren().addAll(info_level, info_lives, info_score, info_time);	
 		theStage.setScene(currentScene);
 	}
 
@@ -203,7 +223,7 @@ public class Game extends Application {
 				if (currentBlocks.get(i).getFill() == Color.BLUE){
 					BOUNCER_SPEED = BOUNCER_SPEED * 1.25;
 				}
-				if (currentBlocks.get(i).getFill() == Color.GREEN && level == 1){
+				if (currentBlocks.get(i).getFill() == Color.GREEN){
 					Rectangle newLife = new Rectangle();
 					newLife.setFill(Color.BLACK);
 					newLife.setWidth(20);
@@ -213,6 +233,16 @@ public class Game extends Application {
 					currentPU.add(newLife);
 					root.getChildren().add(newLife);
 				}
+				//				if (currentBlocks.get(i).getFill() == Color.PURPLE){
+				//					Rectangle r = makeReplacement(2, currentBlocks.get(i));
+				//					currentBlocks.add(r);
+				//					root.getChildren().add(r);
+				//					root.getChildren().remove(currentBlocks.get(i));
+				//					currentBlocks.remove(i);
+				//					currentScene.setRoot(root);
+				//					theStage.setScene(currentScene);
+				//					continue;
+				//				}
 				root.getChildren().remove(currentBlocks.get(i));
 				currentBlocks.remove(i);
 			}
@@ -231,13 +261,13 @@ public class Game extends Application {
 				currentPU.remove(i);
 			}
 		}
-		
-		
+
+
 
 	}
 
 
-	private Rectangle makeReplacement(Group root, int type, Rectangle old){
+	private Rectangle makeReplacement(int type, Rectangle old){
 		double xloc = old.getX();
 		double yloc = old.getY();
 
@@ -253,7 +283,12 @@ public class Game extends Application {
 				VBox root = new VBox();
 				root.setAlignment(Pos.CENTER);
 				Label lb = new Label("YOU WIN!");
-				root.getChildren().add(lb);
+				score = score - (Math.floor(time) / 2);
+				Label finalScore = new Label("Score: " + score);
+				lb.setFont(Font.font(20));
+				Label finalTime = new Label("Score: " + time);
+				lb.setFont(Font.font(20));
+				root.getChildren().addAll(lb, finalScore, finalTime);
 				currentScene.setRoot(root);
 				theStage.setScene(currentScene);
 				aLevel = false;
@@ -265,11 +300,26 @@ public class Game extends Application {
 		}
 	}
 	private Boolean blockWasHit(Rectangle rec){
-
+		double midBallX = (myBall.getBoundsInParent().getMaxX() + myBall.getBoundsInParent().getMinX())/2;
+		double midBallY = (myBall.getBoundsInParent().getMaxY() + myBall.getBoundsInParent().getMinY())/2;
+		double midRecX = (rec.getBoundsInParent().getMaxX() + rec.getBoundsInParent().getMinX())/2;
+		double midRecY = (rec.getBoundsInParent().getMaxY() + rec.getBoundsInParent().getMinY())/2;
+		Boolean onSides = midBallX < midRecX || midBallX > midRecX;
+		Boolean withinY = rec.getBoundsInParent().getMinY() < midBallY && midBallY < rec.getBoundsInParent().getMaxY();
+		Boolean onTopBot = midBallY < midRecY || midBallY > midRecY;
+		Boolean withinX = rec.getBoundsInParent().getMinX() < midBallX && midBallX < rec.getBoundsInParent().getMaxX();
 		if (myBall.getBoundsInParent().intersects(rec.getBoundsInParent())){
-			if (rec.getX() < myBall.getX() || myBall.getX() < rec.getX()){ //ball on right or left, change X
+			if (rec.getFill() == Color.PURPLE || rec.getFill() == Color.GREEN){
+				score = score + 10;
+			} else if (rec.getFill() == Color.BLUE){
+				score = score + 20;
+			} else if (rec.getFill() == Color.PINK){
+				score = score + 30;
+			}
+			if (onSides && withinY){ //ball on right or left, change X
 				deltaX = deltaX * -1;
-			} else {
+			} 
+			if (onTopBot && withinX){
 				deltaY = deltaY * -1;
 			}
 
@@ -277,6 +327,7 @@ public class Game extends Application {
 		}
 		return false;
 	}
+
 
 	private void ballBounce(double elapsedTime){
 		if (myPaddle != null && myBall != null){
@@ -314,6 +365,7 @@ public class Game extends Application {
 			myBall.setTranslateY(myBall.getTranslateY() + deltaY * BOUNCER_SPEED * elapsedTime);
 			if (myBall.getBoundsInParent().getMinY() > SIZE){
 				lives--;
+
 				if (lives == 0){
 					aLevel = false;
 					VBox rt = new VBox();
@@ -321,6 +373,12 @@ public class Game extends Application {
 					Scene scene_LOSE = new Scene(rt, SIZE, SIZE);
 					Label lb = new Label("GAME OVER :(");
 					lb.setFont(Font.font("Comic Sans", FontWeight.BOLD, 50));
+					score = score - (Math.floor(time) / 2);
+					Label finalScore = new Label("Score: " + Math.floor(score));
+					lb.setFont(Font.font(20));
+					Label finalTime = new Label("Score: " + new DecimalFormat("#.#").format(time));
+					lb.setFont(Font.font(20));
+
 					Button btn_SO = new Button("Start Over");
 					btn_SO.setFont(Font.font("Verdana", FontPosture.ITALIC, 15));
 					btn_SO.setOnAction(new EventHandler<ActionEvent>() { //if the button is clicked
@@ -331,11 +389,12 @@ public class Game extends Application {
 
 						}
 					});
-					rt.getChildren().addAll(lb, btn_SO);
+					rt.getChildren().addAll(lb, finalScore, finalTime, btn_SO);
 					currentScene = scene_LOSE;
 					theStage.setScene(currentScene);
 					animation.stop();
 				} else {
+					time = 0;
 					SECOND_DELAY = 0.75 * SECOND_DELAY;
 					currentScene = setupLevel(SIZE, SIZE, BACKGROUND);
 					theStage.setScene(currentScene);
@@ -353,6 +412,18 @@ public class Game extends Application {
 				}
 				r.setTranslateX(r.getTranslateX() + deltaRX * BOUNCER_SPEED * elapsedTime);
 			}
+			if (r.getFill() == Color.ORANGE){
+				if (time > lastTime + 2){
+					Random rand = new Random();
+					int xloc = rand.nextInt(450);
+					int yloc = rand.nextInt(200) + 20;
+					r.setX(xloc);
+					r.setY(yloc);
+					lastTime = time;
+				}
+				
+			}
+
 		}
 		for (int i=0; i<currentPU.size(); i++){
 			Rectangle r = currentPU.get(i);
@@ -363,6 +434,7 @@ public class Game extends Application {
 				currentPU.remove(i);
 			}
 		}
+
 
 	}
 
@@ -391,12 +463,17 @@ public class Game extends Application {
 		else if (code == KeyCode.DIGIT1){
 			level = 1;
 			currentScene = setupLevel(SIZE, SIZE, BACKGROUND);
-			
+
 		}
 		else if (code == KeyCode.DIGIT2){
 			level = 2;
 			currentScene = setupLevel(SIZE, SIZE, BACKGROUND);
-			
+
+		}
+		else if (code == KeyCode.DIGIT3){
+			level = 3;
+			currentScene = setupLevel(SIZE, SIZE, BACKGROUND);
+
 		}
 		else if (code == KeyCode.X){
 			level = 1;
@@ -416,6 +493,21 @@ public class Game extends Application {
 		}
 		else if (code == KeyCode.F){
 			BOUNCER_SPEED = 1.25 * BOUNCER_SPEED;
+		}
+		else if (code == KeyCode.W){
+			VBox root = new VBox();
+			root.setAlignment(Pos.CENTER);
+			Label lb = new Label("YOU WIN!");
+			score = score - (Math.floor(time) / 2);
+			Label finalScore = new Label("Score: " + score);
+			lb.setFont(Font.font(20));
+			Label finalTime = new Label("Time: " + new DecimalFormat("#.#").format(time));
+			lb.setFont(Font.font(20));
+			root.getChildren().addAll(lb, finalScore, finalTime);
+			currentScene.setRoot(root);
+			theStage.setScene(currentScene);
+			aLevel = false;
+			animation.stop();
 		}
 	}
 	public static void main(String[] args){
