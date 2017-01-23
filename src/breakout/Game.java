@@ -54,11 +54,11 @@ public class Game extends Application {
 	private int[][] L1 = new int[3][5];
 	private int[][] L2 = new int[3][5];
 	private int[][] L3 = new int[3][3];
-	
+
 	private ArrayList<Rectangle> currentBlocks = new ArrayList<Rectangle>(); //list of the blocks in the root
 	private ArrayList<Rectangle> currentPU = new ArrayList<Rectangle>(); //list of any power ups in the root
 	private Scene currentScene; //vessel for the various scenes created during the game
-	
+
 	private int level = 1; //each level has different layout, power ups, blocks, etc.
 	private Boolean aLevel = false; //some methods should only be done if in a method
 	private int lives = 3; //start off the game with 3 lives
@@ -134,7 +134,7 @@ public class Game extends Application {
 		root.getChildren().addAll(btn_Play, btn_instr);
 		return scene_HP;
 	}
-	
+
 	private Scene setupLevel (int width, int height, Paint background) { //returns the scene given what level we're on
 
 
@@ -212,7 +212,7 @@ public class Game extends Application {
 		info_time = new Label("Seconds elapsed: " + new DecimalFormat("#.#").format(time));
 		info_lives.setLayoutX(60);
 		info_score.setLayoutX(180);
-		info_time.setLayoutX(250);
+		info_time.setLayoutX(270);
 		root.getChildren().addAll(info_level, info_lives, info_score, info_time);	
 		theStage.setScene(currentScene);
 	}
@@ -312,38 +312,57 @@ public class Game extends Application {
 
 	private void ballBounce(double elapsedTime){ //bounce the ball off the paddle
 		if (myPaddle != null && myBall != null){
-			Boolean A = myPaddle.getBoundsInParent().getMinY() < myBall.getBoundsInParent().getMinY();
-			Boolean B = myBall.getBoundsInParent().getMaxY() < myPaddle.getBoundsInParent().getMaxY();
-			Boolean C = myBall.getBoundsInParent().getMaxX() > myPaddle.getBoundsInParent().getMinX();
-			Boolean D = myBall.getBoundsInParent().getMinX() < myPaddle.getBoundsInParent().getMaxX();
-			Boolean E = myBall.getTranslateX() < myPaddle.getX();
-			Boolean F = myBall.getTranslateX() > myPaddle.getX();
-			if ( (C && E) || (D && F) ) {
-				if (A && B) {
+			//			Boolean A = myPaddle.getBoundsInParent().getMinY() < myBall.getBoundsInParent().getMinY();
+			//			Boolean B = myBall.getBoundsInParent().getMaxY() < myPaddle.getBoundsInParent().getMaxY();
+			//			Boolean C = myBall.getBoundsInParent().getMaxX() > myPaddle.getBoundsInParent().getMinX();
+			//			Boolean D = myBall.getBoundsInParent().getMinX() < myPaddle.getBoundsInParent().getMaxX();
+			//			Boolean E = myBall.getTranslateX() < myPaddle.getX();
+			//			Boolean F = myBall.getTranslateX() > myPaddle.getX();
+			//			if ( (C && E) || (D && F) ) {
+			//				if (A && B) {
+			//					deltaX = deltaX * -1;
+			//				}
+			//			} 
+
+			//			Boolean Aa = myPaddle.getBoundsInParent().getMinX() < myBall.getBoundsInParent().getMinX();
+			//			Boolean Bb = myBall.getBoundsInParent().getMaxX() < myPaddle.getBoundsInParent().getMaxX();
+			//			Boolean Cc = myBall.getBoundsInParent().getMaxY() > myPaddle.getBoundsInParent().getMinY();
+			//			Boolean Dd = myBall.getBoundsInParent().getMinY() < myPaddle.getBoundsInParent().getMaxY();
+			//			Boolean Ee = myBall.getTranslateY() < myPaddle.getY();
+			//			Boolean Ff = myBall.getTranslateY() > myPaddle.getY();
+			//			if ( (Cc && Ee) || (Dd && Ff) ) {
+			//				if (Aa && Bb) {
+			//					deltaY = deltaY * -1;
+			//				}
+			//			}
+			if (myBall.getBoundsInParent().intersects(myPaddle.getBoundsInParent())){
+				double midBallX = (myBall.getBoundsInParent().getMaxX() + myBall.getBoundsInParent().getMinX())/2;
+				double midBallY = (myBall.getBoundsInParent().getMaxY() + myBall.getBoundsInParent().getMinY())/2;
+				double midRecX = (myPaddle.getBoundsInParent().getMaxX() + myPaddle.getBoundsInParent().getMinX())/2;
+				double midRecY = (myPaddle.getBoundsInParent().getMaxY() + myPaddle.getBoundsInParent().getMinY())/2;
+				Boolean onSides = midBallX < midRecX || midBallX > midRecX;
+				Boolean withinY = myPaddle.getBoundsInParent().getMinY() < midBallY && midBallY < myPaddle.getBoundsInParent().getMaxY();
+				Boolean onTopBot = midBallY < midRecY || midBallY > midRecY;
+				Boolean withinX = myPaddle.getBoundsInParent().getMinX() < midBallX && midBallX < myPaddle.getBoundsInParent().getMaxX();
+
+				if (onSides && withinY){ //ball on right or left, change X
 					deltaX = deltaX * -1;
+				} 
+				if (onTopBot && withinX){
+					deltaY = deltaY * -1;
 				}
-			} 
+			}
 			if (myBall.getBoundsInParent().getMinX() < 0 || 
 					myBall.getBoundsInParent().getMaxX() > SIZE){
 				deltaX = deltaX * -1;
 			} 
-			myBall.setTranslateX(myBall.getTranslateX() + deltaX * BOUNCER_SPEED * elapsedTime);
-
-			Boolean Aa = myPaddle.getBoundsInParent().getMinX() < myBall.getBoundsInParent().getMinX();
-			Boolean Bb = myBall.getBoundsInParent().getMaxX() < myPaddle.getBoundsInParent().getMaxX();
-			Boolean Cc = myBall.getBoundsInParent().getMaxY() > myPaddle.getBoundsInParent().getMinY();
-			Boolean Dd = myBall.getBoundsInParent().getMinY() < myPaddle.getBoundsInParent().getMaxY();
-			Boolean Ee = myBall.getTranslateY() < myPaddle.getY();
-			Boolean Ff = myBall.getTranslateY() > myPaddle.getY();
-			if ( (Cc && Ee) || (Dd && Ff) ) {
-				if (Aa && Bb) {
-					deltaY = deltaY * -1;
-				}
-			}
 			if (myBall.getBoundsInParent().getMinY() < 0){
 				deltaY = deltaY * -1;
 			} 
+
+			myBall.setTranslateX(myBall.getTranslateX() + deltaX * BOUNCER_SPEED * elapsedTime);
 			myBall.setTranslateY(myBall.getTranslateY() + deltaY * BOUNCER_SPEED * elapsedTime);
+
 			if (myBall.getBoundsInParent().getMinY() > SIZE){
 				lives--;
 
@@ -402,7 +421,7 @@ public class Game extends Application {
 					r.setY(yloc);
 					lastTime = time;
 				}
-				
+
 			}
 
 		}
