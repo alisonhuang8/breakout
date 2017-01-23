@@ -29,9 +29,9 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 public class Game extends Application {
-	private ImageView myBall;
+	private ImageView myBall; 
 	private Rectangle myPaddle;
-	private Stage theStage;
+	private Stage theStage; //so its easy to set the scene no matter where you are in the code
 	public static final int SIZE = 500;
 	public static final Paint BACKGROUND = Color.WHITE;
 
@@ -42,10 +42,9 @@ public class Game extends Application {
 	public static final double GROWTH_RATE = 1.1;
 
 	private Timeline animation = new Timeline();
-	private int deltaX = 1;
-	private int deltaY = 1;
-	private int deltaRX = 1;
-	private int level = 1;
+	private int deltaX = 1; //direction of the ball
+	private int deltaY = 1; 
+	private int deltaRX = 1; //direction of moving pink blocks
 
 	private double BOUNCER_SPEED = 60;
 	private int FRAMES_PER_SECOND = 240;
@@ -55,17 +54,20 @@ public class Game extends Application {
 	private int[][] L1 = new int[3][5];
 	private int[][] L2 = new int[3][5];
 	private int[][] L3 = new int[3][3];
-	private ArrayList<Rectangle> currentBlocks = new ArrayList<Rectangle>();
-	private ArrayList<Rectangle> currentPU = new ArrayList<Rectangle>();
-	private Scene currentScene;
-	private Boolean aLevel = false;
-	private int lives = 3;
+	
+	private ArrayList<Rectangle> currentBlocks = new ArrayList<Rectangle>(); //list of the blocks in the root
+	private ArrayList<Rectangle> currentPU = new ArrayList<Rectangle>(); //list of any power ups in the root
+	private Scene currentScene; //vessel for the various scenes created during the game
+	
+	private int level = 1; //each level has different layout, power ups, blocks, etc.
+	private Boolean aLevel = false; //some methods should only be done if in a method
+	private int lives = 3; //start off the game with 3 lives
 	private double score = 0;
 	private double time = 0;
-	private double lastTime = 0;
+	private double lastTime = 0; //to make sure the random movement of the orange blocks only happen every X seconds
 
-	private Label info_level;
-	private Label info_lives;
+	private Label info_level; //i only want to make the label once and just delete and reload an edited version
+	private Label info_lives; //otherwise i would overlay a large number of the same labels
 	private Label info_score;
 	private Label info_time;
 
@@ -93,7 +95,7 @@ public class Game extends Application {
 		L3[2][0] = 1; L3[2][1] = 1; L3[2][2] = 1;
 	}
 
-	private Scene setupHP (int width, int height, Paint background) {
+	private Scene setupHP (int width, int height, Paint background) { //scene for home page!
 		VBox root = new VBox(); //create root for home page scene
 		root.setAlignment(Pos.CENTER); //center the things in the root
 		Scene scene_HP = new Scene (root, width, height, background); //establish the root that will be returned
@@ -132,7 +134,8 @@ public class Game extends Application {
 		root.getChildren().addAll(btn_Play, btn_instr);
 		return scene_HP;
 	}
-	private Scene setupLevel (int width, int height, Paint background) {
+	
+	private Scene setupLevel (int width, int height, Paint background) { //returns the scene given what level we're on
 
 
 		aLevel = true;
@@ -167,7 +170,7 @@ public class Game extends Application {
 
 		return scene;
 	}
-	private void ballAndPaddle(Group root, int width, int height, Scene s){
+	private void ballAndPaddle(Group root, int width, int height, Scene s){ //initializing the ball and paddle
 		Image image = new Image(getClass().getClassLoader().getResourceAsStream(BALL_IMAGE));
 		myBall = new ImageView(image);
 		myBall.setTranslateX(250);
@@ -179,11 +182,11 @@ public class Game extends Application {
 	}
 
 
-	private void step (double elapsedTime, Stage stage) {
+	private void step (double elapsedTime, Stage stage) { //different methods that are performed at each step
 		// update attributes
 		newLevel(SIZE, SIZE, BACKGROUND);
 
-		if (aLevel){
+		if (aLevel){ //only do this if we're in a level
 			ballBounce(elapsedTime);
 			removeBlocksHit(elapsedTime);
 			movingBlocks(elapsedTime);
@@ -193,12 +196,11 @@ public class Game extends Application {
 		}
 	}
 
-	private void updateTime(double elapsedTime){
+	private void updateTime(double elapsedTime){ // update the time elapsed
 		time = time + elapsedTime;
-
 	}
 
-	private void updateInfo(){
+	private void updateInfo(){ //update the labels at the top
 		Group root = (Group) currentScene.getRoot();
 		root.getChildren().remove(info_level);
 		root.getChildren().remove(info_lives);
@@ -215,7 +217,7 @@ public class Game extends Application {
 		theStage.setScene(currentScene);
 	}
 
-	private void removeBlocksHit(double elapsedTime){
+	private void removeBlocksHit(double elapsedTime){ //check if any blocks have been hit and then remove them in one time step
 		Group root = (Group) currentScene.getRoot();
 
 		for (int i=0; i<currentBlocks.size(); i++){
@@ -233,16 +235,7 @@ public class Game extends Application {
 					currentPU.add(newLife);
 					root.getChildren().add(newLife);
 				}
-				//				if (currentBlocks.get(i).getFill() == Color.PURPLE){
-				//					Rectangle r = makeReplacement(2, currentBlocks.get(i));
-				//					currentBlocks.add(r);
-				//					root.getChildren().add(r);
-				//					root.getChildren().remove(currentBlocks.get(i));
-				//					currentBlocks.remove(i);
-				//					currentScene.setRoot(root);
-				//					theStage.setScene(currentScene);
-				//					continue;
-				//				}
+
 				root.getChildren().remove(currentBlocks.get(i));
 				currentBlocks.remove(i);
 			}
@@ -262,21 +255,9 @@ public class Game extends Application {
 			}
 		}
 
-
-
 	}
 
-
-	private Rectangle makeReplacement(int type, Rectangle old){
-		double xloc = old.getX();
-		double yloc = old.getY();
-
-		Rectangle r = new Block(type, xloc, yloc).createBlock();
-		return r;
-
-	}
-
-	private void newLevel(int width, int height, Paint background){
+	private void newLevel(int width, int height, Paint background){ //make the new level with the scene returned from setupLevel method
 		if (currentBlocks.size() == 0){
 			level++;
 			if (level == 4){
@@ -299,7 +280,7 @@ public class Game extends Application {
 			}
 		}
 	}
-	private Boolean blockWasHit(Rectangle rec){
+	private Boolean blockWasHit(Rectangle rec){ //check if each of the balls are hit
 		double midBallX = (myBall.getBoundsInParent().getMaxX() + myBall.getBoundsInParent().getMinX())/2;
 		double midBallY = (myBall.getBoundsInParent().getMaxY() + myBall.getBoundsInParent().getMinY())/2;
 		double midRecX = (rec.getBoundsInParent().getMaxX() + rec.getBoundsInParent().getMinX())/2;
@@ -329,7 +310,7 @@ public class Game extends Application {
 	}
 
 
-	private void ballBounce(double elapsedTime){
+	private void ballBounce(double elapsedTime){ //bounce the ball off the paddle
 		if (myPaddle != null && myBall != null){
 			Boolean A = myPaddle.getBoundsInParent().getMinY() < myBall.getBoundsInParent().getMinY();
 			Boolean B = myBall.getBoundsInParent().getMaxY() < myPaddle.getBoundsInParent().getMaxY();
@@ -403,7 +384,7 @@ public class Game extends Application {
 		}
 	}
 
-	private void movingBlocks(double elapsedTime){
+	private void movingBlocks(double elapsedTime){ //move the pink and orange blocks
 		for (int i=0; i<currentBlocks.size(); i++){
 			Rectangle r = currentBlocks.get(i);
 			if (r.getFill() == Color.PINK){
@@ -438,7 +419,7 @@ public class Game extends Application {
 
 	}
 
-	private Boolean catchPU(Rectangle r){
+	private Boolean catchPU(Rectangle r){ //check if the power ups were caught!
 		if (myPaddle.getBoundsInParent().intersects(r.getBoundsInParent())){
 			return true;
 		}
@@ -447,7 +428,7 @@ public class Game extends Application {
 
 	}
 
-	private void handleKeyInput (KeyCode code) {
+	private void handleKeyInput (KeyCode code) { //any key inputs?
 		if (code == KeyCode.RIGHT & myPaddle.getBoundsInParent().getMaxX() < SIZE ) {
 			myPaddle.setX(myPaddle.getX() + KEY_INPUT_SPEED);
 		}
