@@ -96,13 +96,13 @@ public class Game extends Application {
 	}
 
 	private Scene setupHP (int width, int height, Paint background) { //scene for home page!
+		time = 0;
+		score = 0;
 		VBox root = new VBox(); //create root for home page scene
 		root.setAlignment(Pos.CENTER); //center the things in the root
 		Scene scene_HP = new Scene (root, width, height, background); //establish the root that will be returned
 		currentScene = scene_HP;
-
-
-
+		
 		Label lb = new Label("BREAKOUT!");
 		lb.setFont(Font.font("Comic Sans", FontWeight.BOLD, 70));
 		root.getChildren().add(lb); //make label and add it
@@ -136,7 +136,6 @@ public class Game extends Application {
 	}
 
 	private Scene setupLevel (int width, int height, Paint background) { //returns the scene given what level we're on
-
 
 		aLevel = true;
 		KeyFrame frame = new KeyFrame(Duration.millis(MILLISECOND_DELAY),
@@ -312,29 +311,7 @@ public class Game extends Application {
 
 	private void ballBounce(double elapsedTime){ //bounce the ball off the paddle
 		if (myPaddle != null && myBall != null){
-			//			Boolean A = myPaddle.getBoundsInParent().getMinY() < myBall.getBoundsInParent().getMinY();
-			//			Boolean B = myBall.getBoundsInParent().getMaxY() < myPaddle.getBoundsInParent().getMaxY();
-			//			Boolean C = myBall.getBoundsInParent().getMaxX() > myPaddle.getBoundsInParent().getMinX();
-			//			Boolean D = myBall.getBoundsInParent().getMinX() < myPaddle.getBoundsInParent().getMaxX();
-			//			Boolean E = myBall.getTranslateX() < myPaddle.getX();
-			//			Boolean F = myBall.getTranslateX() > myPaddle.getX();
-			//			if ( (C && E) || (D && F) ) {
-			//				if (A && B) {
-			//					deltaX = deltaX * -1;
-			//				}
-			//			} 
 
-			//			Boolean Aa = myPaddle.getBoundsInParent().getMinX() < myBall.getBoundsInParent().getMinX();
-			//			Boolean Bb = myBall.getBoundsInParent().getMaxX() < myPaddle.getBoundsInParent().getMaxX();
-			//			Boolean Cc = myBall.getBoundsInParent().getMaxY() > myPaddle.getBoundsInParent().getMinY();
-			//			Boolean Dd = myBall.getBoundsInParent().getMinY() < myPaddle.getBoundsInParent().getMaxY();
-			//			Boolean Ee = myBall.getTranslateY() < myPaddle.getY();
-			//			Boolean Ff = myBall.getTranslateY() > myPaddle.getY();
-			//			if ( (Cc && Ee) || (Dd && Ff) ) {
-			//				if (Aa && Bb) {
-			//					deltaY = deltaY * -1;
-			//				}
-			//			}
 			if (myBall.getBoundsInParent().intersects(myPaddle.getBoundsInParent())){
 				double midBallX = (myBall.getBoundsInParent().getMaxX() + myBall.getBoundsInParent().getMinX())/2;
 				double midBallY = (myBall.getBoundsInParent().getMaxY() + myBall.getBoundsInParent().getMinY())/2;
@@ -451,50 +428,50 @@ public class Game extends Application {
 		if (code == KeyCode.RIGHT & myPaddle.getBoundsInParent().getMaxX() < SIZE ) {
 			myPaddle.setX(myPaddle.getX() + KEY_INPUT_SPEED);
 		}
-		else if (code == KeyCode.LEFT & myPaddle.getBoundsInParent().getMinX() > 0) {
+		if (code == KeyCode.LEFT & myPaddle.getBoundsInParent().getMinX() > 0) {
 			myPaddle.setX(myPaddle.getX() - KEY_INPUT_SPEED);
 		}
-		else if (code == KeyCode.UP & myPaddle.getBoundsInParent().getMinY() > 0) {
+		if (code == KeyCode.UP & myPaddle.getBoundsInParent().getMinY() > 0) {
 			myPaddle.setY(myPaddle.getY() - KEY_INPUT_SPEED);
 		}
-		else if (code == KeyCode.DOWN & myPaddle.getBoundsInParent().getMaxY() < SIZE) {
+		if (code == KeyCode.DOWN & myPaddle.getBoundsInParent().getMaxY() < SIZE) {
 			myPaddle.setY(myPaddle.getY() + KEY_INPUT_SPEED);
 		}
-		else if (code == KeyCode.DIGIT1){
+		if (code == KeyCode.DIGIT1){
 			level = 1;
 			currentScene = setupLevel(SIZE, SIZE, BACKGROUND);
 
 		}
-		else if (code == KeyCode.DIGIT2){
+		if (code == KeyCode.DIGIT2){
 			level = 2;
 			currentScene = setupLevel(SIZE, SIZE, BACKGROUND);
 
 		}
-		else if (code == KeyCode.DIGIT3){
+		if (code == KeyCode.DIGIT3){
 			level = 3;
 			currentScene = setupLevel(SIZE, SIZE, BACKGROUND);
 
 		}
-		else if (code == KeyCode.X){
+		if (code == KeyCode.X){
 			level = 1;
 			lives = 3;
 			currentScene = setupHP(SIZE, SIZE, BACKGROUND);
 			aLevel = false;
 			theStage.setScene(currentScene);
 		}
-		else if (code == KeyCode.L){
+		if (code == KeyCode.L){
 			lives++;
 		}
-		else if (code == KeyCode.R){
+		if (code == KeyCode.R){
 			currentScene = setupLevel(SIZE, SIZE, BACKGROUND);
 		}
-		else if (code == KeyCode.S){
+		if (code == KeyCode.S){
 			BOUNCER_SPEED = 0.75 * BOUNCER_SPEED;
 		}
-		else if (code == KeyCode.F){
+		if (code == KeyCode.F){
 			BOUNCER_SPEED = 1.25 * BOUNCER_SPEED;
 		}
-		else if (code == KeyCode.W){
+		if (code == KeyCode.W){
 			VBox root = new VBox();
 			root.setAlignment(Pos.CENTER);
 			Label lb = new Label("YOU WIN!");
@@ -508,6 +485,12 @@ public class Game extends Application {
 			theStage.setScene(currentScene);
 			aLevel = false;
 			animation.stop();
+		}
+		if (code == KeyCode.P){
+			animation.pause();
+		}
+		if (code == KeyCode.G){
+			animation.play();
 		}
 	}
 	public static void main(String[] args){

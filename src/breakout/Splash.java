@@ -40,6 +40,7 @@ public class Splash {
 				+ "      e. Press S to slow down the ball and blocks\n"
 				+ "      f. Press F to speed up to ball and blocks\n"
 				+ "      g. Press W to go to the end of the game and see your results\n"
+				+ "      i. Press P to pause and G to go\n"
 				+ " 6. Here are the point breakdowns:\n"
 				+ "      a. A purple or green block = 10 points\n"
 				+ "      b. A blue block = 20 points\n"
