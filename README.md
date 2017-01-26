@@ -28,6 +28,15 @@ Bugs and crashes:
 3. The physics of the collisions is not mathematically sound. There should be angles involved in how the ball rebounds off of a surface. The current directions of the ball are just programmed to make a 90 degree change in direction.
 
 Extra features: Your score is dependent on how fast you finish the game. The quicker you are the better! The number of seconds from the start of the game until the end is recorded, and then used to deduct from the points you have accumulated from destroying the blocks.
+Cheat codes:
+1. Press X to exit back to the home page
+2. Press 1, 2, or 3 to go to that specific level
+3. Press R to reset the level you're on
+4. Press L for more lives
+5. Press S to make the ball and blocks slower
+6. Press F to make the ball and blocks faster
+7. Press W to go to the end of the game and see your results
+8. Press P to pause and G to resume
 
 #Impressions
 I was initially extremely overwhelmed; I don't think the classes I've taken up to now (namely CS201) really prepared me to dive into this project. We never really did much object oriented programming or saw the intricacies behind how classes and objects and methods all came together. We really only wrote algorithms and methods in that class. I do think that I learned a lot having finished. 
