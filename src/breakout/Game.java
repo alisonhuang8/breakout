@@ -353,7 +353,7 @@ public class Game extends Application {
 					score = score - (Math.floor(time) / 2);
 					Label finalScore = new Label("Score: " + Math.floor(score));
 					lb.setFont(Font.font(20));
-					Label finalTime = new Label("Score: " + new DecimalFormat("#.#").format(time));
+					Label finalTime = new Label("Time: " + new DecimalFormat("#.#").format(time));
 					lb.setFont(Font.font(20));
 
 					Button btn_SO = new Button("Start Over");

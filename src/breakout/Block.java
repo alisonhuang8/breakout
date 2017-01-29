@@ -1,3 +1,11 @@
+/*
+ *Refactored code in this class. Originally had a method to make each type of block, which resulted in a lot of
+ *duplicated code. Changes made were so that there is only one method that is needed, as long as the constructor passes
+ *in a type value. The type helps to determine what color to set the fill of the rectangle, but the rest of the 
+ *specifications are left the same. This, however, simplifies the block parameters so that if the user wants to change up
+ *the sizes of the blocks then other changes would need to be made.
+ */
+
 package breakout;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
@@ -26,84 +34,24 @@ public class Block extends Rectangle {
 	}
 	
 	public Rectangle createBlock(){
+		Rectangle rec = new Rectangle();
 		if (type == 1){
-			block = createType1();
+			rec.setFill(Color.PURPLE);
 		} else if (type == 2){
-			block = createType2();
+			rec.setFill(Color.BLUE);
 		} else if (type == 3){
-			block = createType3();
+			rec.setFill(Color.PINK);
 		} else if (type == 4){
-			block = createType4();
+			rec.setFill(Color.GREEN);
 		} else if (type == 5){
-			block = createType5();
+			rec.setFill(Color.ORANGE);
 		}
-		return block;
-	}
-	public Rectangle createType1(){
-		Rectangle rec = new Rectangle();
+		
 		rec.setX(xloc);
 		rec.setY(yloc);
 		rec.setWidth(500/9);
 		rec.setHeight(30);
-		rec.setFill(Color.PURPLE);
-		return rec;
-	}
-	public Rectangle createType2(){
-		Rectangle rec = new Rectangle();
-		rec.setX(xloc);
-		rec.setY(yloc);
-		rec.setWidth(500/9);
-		rec.setHeight(30);
-		rec.setFill(Color.BLUE);
 		
 		return rec;
 	}
-	public Rectangle createType3(){ // moving block
-		Rectangle rec = new Rectangle();
-		rec.setX(xloc);
-		rec.setY(yloc);
-		rec.setWidth(500/9);
-		rec.setHeight(30);
-		rec.setFill(Color.PINK);
-		return rec;
-	}
-	public Rectangle createType4(){ // power ups
-		Rectangle rec = new Rectangle();
-		rec.setX(xloc);
-		rec.setY(yloc);
-		rec.setWidth(500/9);
-		rec.setHeight(30);
-		rec.setFill(Color.GREEN);
-		return rec;
-	}
-	public Rectangle createType5(){ // power ups
-		Rectangle rec = new Rectangle();
-		rec.setX(xloc);
-		rec.setY(yloc);
-		rec.setWidth(500/9);
-		rec.setHeight(30);
-		rec.setFill(Color.ORANGE);
-		return rec;
-	}
-	
-	
-	
-	
-	public int returnType(){
-		return type;
-	}
-	
-	public double returnX(){
-		return xloc;
-	}
-	
-	public double returnY(){
-		return yloc;
-	}
-	
-	public void decType(){
-		type = type - 1;
-	}
-	
-	
 }
